@@ -3,23 +3,45 @@ import matplotlib.pyplot as plt
 import random
 
 #global variables, dictionairies, lists
+
+#quality class metrics and target values
+quality_class1 = {'availability':0.9, 'latency':0.2, 'noise':0.2}
+quality_class2 = {'availability':0.5, 'latency':0.2, 'noise':0.3}
+    
+#quality class datasources
+quality_class1_resources = ['datasource1', 'datasource2', 'datasource3', 'datasource4']
+quality_class2_resources = ['datasource2', 'datasource3', 'datasource5', 'datasource6']
+
+#quality class weights
+quality_class1_weights = {'availability':0.5, 'latency':0.3, 'noise':0.2}
+quality_class2_weights = {'availability':0.2, 'latency':0.7, 'noise':0.1}
+
+#initialization of reputation scores 
 objective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
-lamda = 0.8
-weight = 0.8
 subjective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
 reputation_old_providers = {'provider1':0.0, 'provider2':0.0, 'provider3':0.0, 'provider4':0.0, 'provider5':0.0, 'provider6':0.0}
 reputation_old_federations = {'federation1': 0.0, 'federation2': 0.0}
 reputation_old_products = {'product1': 0.0, 'product2': 0.0, 'product3': 0.0, 'product4': 0.0}
 final_reputation_scores = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
+
+#global variables
+lamda = 0.8
+weight = 0.8
+
 #product 1 and porduct 2 belongs to service class 1 and have quality class 1
 product1 = ['datasource1', 'datasource2']
 product2 = ['datasource3', 'datasource4']
+
 #product 3 and porduct 4 belongs to service class 2 and have quality class 2
 product3 = ['datasource2', 'datasource3']
 product4 = ['datasource5', 'datasource6']
 #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different service/quqlity classes
 #so they will have multiple values in the same monitoring period based on those quality classes
 datasources = ['datasource1', 'datasource2', 'datasource3', 'datasource4', 'datasource5', 'datasource6']
+
+
+federation1 = ['datasource1', 'datasource2', 'datasource3', 'datasource4']
+federation2 = ['datasource2', 'datasource3', 'datasource5', 'datasource6']
 
 #check deviation
 def deviation():
@@ -110,7 +132,6 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
         print (temp_score_per_metric) #3 values per datasource as many as the objective metrics
 
         #calculation of objective score per datasource
-        quality_class1_weights = {'availability':0.5, 'latency':0.3, 'noise':0.2}
         objectivescore = temp_score_per_metric[0]*quality_class1_weights['availability'] + temp_score_per_metric[1]*quality_class1_weights['latency'] + temp_score_per_metric[2]*quality_class1_weights['noise']
         print ("The objective score for ", j, " is: ", objectivescore)
         add(objective_scores_qualityclass1, j, objectivescore)
@@ -143,7 +164,6 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
         print (temp_score_per_metric) #3 values per datasource as many as the objective metrics
 
         #calculation of objective score per datasource   
-        quality_class2_weights = {'availability':0.2, 'latency':0.7, 'noise':0.1}
         objectivescore = temp_score_per_metric[0]*quality_class2_weights['availability'] + temp_score_per_metric[1]*quality_class2_weights['latency'] + temp_score_per_metric[2]*quality_class2_weights['noise']
         print ("The objective score for ", j, " is: ", objectivescore)
         add(objective_scores_qualityclass2, j, objectivescore)
@@ -249,8 +269,6 @@ def reputation_update_providers(final_reputation):
 def reputation_update_federations(final_reputation):
     current_federation1 = 0
     current_federation2 = 0
-    federation1 = ['datasource1', 'datasource2', 'datasource3', 'datasource4']
-    federation2 = ['datasource2', 'datasource3', 'datasource5', 'datasource6']
     for i in final_reputation:
         if (contains(final_reputation, federation1, i) == True):
             #print ("OMGGGGGGGGGGG", final_reputation[i])
@@ -284,15 +302,7 @@ def reputation_update_products(final_reputation):
     return reputation_old_products;
 
 def main():
-    print("Hello World!")
 
-    #quality class metrics and tqrget values
-    quality_class1 = {'availability':0.9, 'latency':0.2, 'noise':0.2}
-    quality_class2 = {'availability':0.5, 'latency':0.2, 'noise':0.3}
-    
-    quality_class1_resources = ['datasource1', 'datasource2', 'datasource3', 'datasource4']
-    quality_class2_resources = ['datasource2', 'datasource3', 'datasource5', 'datasource6']
-    
     transactions = ['product1', 'product2', 'product3', 'product4']
     #4 transactions with 1 product per transaction, each product is composed of 2 datasources
     for i in transactions:
