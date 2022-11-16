@@ -19,9 +19,11 @@ quality_class2_weights = {'availability':0.2, 'latency':0.7, 'noise':0.1}
 #initialization of reputation scores 
 objective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
 subjective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
+
 reputation_old_providers = {'provider1':0.0, 'provider2':0.0, 'provider3':0.0, 'provider4':0.0, 'provider5':0.0, 'provider6':0.0}
 reputation_old_federations = {'federation1': 0.0, 'federation2': 0.0}
 reputation_old_products = {'product1': 0.0, 'product2': 0.0, 'product3': 0.0, 'product4': 0.0}
+
 final_reputation_scores = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
 
 #global variables
@@ -30,18 +32,24 @@ weight = 0.8
 
 #product 1 and porduct 2 belongs to service class 1 and have quality class 1
 product1 = ['datasource1', 'datasource2']
+product1_weights = {'datasource1':0.8, 'datasource2':0.2}
 product2 = ['datasource3', 'datasource4']
+product2_weights = {'datasource3':0.2, 'datasource4':0.8}
 
 #product 3 and porduct 4 belongs to service class 2 and have quality class 2
 product3 = ['datasource2', 'datasource3']
+product3_weights = {'datasource2':0.4, 'datasource3':0.6}
 product4 = ['datasource5', 'datasource6']
+product4_weights = {'datasource5':0.3, 'datasource6':0.7}
 #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different service/quqlity classes
 #so they will have multiple values in the same monitoring period based on those quality classes
 datasources = ['datasource1', 'datasource2', 'datasource3', 'datasource4', 'datasource5', 'datasource6']
 
 
 federation1 = ['datasource1', 'datasource2', 'datasource3', 'datasource4']
+federation1_weights = {'datasource1': 0.1, 'datasource2': 0.2, 'datasource3': 0.3, 'datasource4':0.4}
 federation2 = ['datasource2', 'datasource3', 'datasource5', 'datasource6']
+federation2_weights = {'datasource2': 0.6, 'datasource3': 0.1, 'datasource5': 0.2, 'datasource6': 0.1}
 
 #check deviation
 def deviation():
@@ -272,9 +280,9 @@ def reputation_update_federations(final_reputation):
     for i in final_reputation:
         if (contains(final_reputation, federation1, i) == True):
             #print ("OMGGGGGGGGGGG", final_reputation[i])
-            current_federation1 = current_federation1 + final_reputation[i]
-        if (final_reputation, federation2, i):
-            current_federation2 = current_federation2 + final_reputation[i]
+            current_federation1 = current_federation1 + final_reputation[i]*federation1_weights[i]
+        if (contains(final_reputation, federation2, i) == True):
+            current_federation2 = current_federation2 + final_reputation[i]*federation2_weights[i]
     #there is no need to see the old value of the federation as the datasources already taking into account the old values 
     final_federation1 = current_federation1 / len(federation1)
     reputation_old_federations['federation1'] = final_federation1
@@ -285,17 +293,33 @@ def reputation_update_federations(final_reputation):
 
 #update current product of the traction and the affected ones that may have one or multiple common datasources
 def reputation_update_products(final_reputation):
-    
-    final_product1 = (final_reputation['datasource1'] + final_reputation['datasource2'])/len(product1)
+    current_product1 =0
+    for i in final_reputation:
+        if(contains(final_reputation, product1_weights, i)== True):
+            #print("FUCKKKKKKKKKKKKKKKKKKKKK", final_reputation[i], product1_weights[i])
+            current_product1 = current_product1 + final_reputation[i]*product1_weights[i]
+    final_product1 = current_product1/len(product1)
     reputation_old_products['product1']=final_product1
 
-    final_product2 = (final_reputation['datasource3'] + final_reputation['datasource4'])/len(product2)
+    current_product2=0
+    for i in final_reputation:
+        if(contains(final_reputation, product2_weights, i)== True):
+            current_product2 = current_product2 + final_reputation[i]*product2_weights[i]
+    final_product2 = current_product2/len(product2)
     reputation_old_products['product2']=final_product2
 
-    final_product3 = (final_reputation['datasource2'] + final_reputation['datasource3'])/len(product3)
+    current_product3=0
+    for i in final_reputation:
+        if(contains(final_reputation, product3_weights, i)== True):
+            current_product3 = current_product3 + final_reputation[i]*product3_weights[i]
+    final_product3 = current_product3/len(product3)
     reputation_old_products['product3']=final_product3
 
-    final_product4 = (final_reputation['datasource5'] + final_reputation['datasource6'])/len(product4)
+    current_product4=0
+    for i in final_reputation:
+        if(contains(final_reputation, product4_weights, i)== True):
+            current_product4 = current_product4 + final_reputation[i]*product4_weights[i]
+    final_product4 = current_product4/len(product4)
     reputation_old_products['product4']=final_product4
 
     print ("productsssssssssssssssssssssssssssss", reputation_old_products)
