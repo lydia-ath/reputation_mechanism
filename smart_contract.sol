@@ -7,7 +7,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Implements purchashing process along with voting process
  * @ Lydia Athanasiou
  */
-contract Dummy{
+contract reputation{
 
     // The address of the stored product
     address public productAddress;
