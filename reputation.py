@@ -31,19 +31,19 @@ lamda = 0.8
 weight = 0.8
 
 #product 1 and porduct 2 belongs to service class 1 and have quality class 1
-product1 = {'datasource1':0.8, 'datasource2':0.2}
-product2= {'datasource3':0.2, 'datasource4':0.8}
+product1 = {'datasource1':0.8, 'datasource2':0.6}
+product2= {'datasource3':0.7, 'datasource4':0.9}
 
 #product 3 and porduct 4 belongs to service class 2 and have quality class 2
-product3 = {'datasource2':0.4, 'datasource3':0.6}
-product4 = {'datasource5':0.3, 'datasource6':0.7}
+product3 = {'datasource2':0.7, 'datasource3':0.6}
+product4 = {'datasource5':0.8, 'datasource6':0.8}
 #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different service/quqlity classes
 #so they will have multiple values in the same monitoring period based on those quality classes
 datasources = ['datasource1', 'datasource2', 'datasource3', 'datasource4', 'datasource5', 'datasource6']
 
 
-federation1 = {'datasource1': 0.1, 'datasource2': 0.2, 'datasource3': 0.3, 'datasource4':0.4}
-federation2 = {'datasource2': 0.6, 'datasource3': 0.1, 'datasource5': 0.2, 'datasource6': 0.1}
+federation1 = {'datasource1': 0.7, 'datasource2': 0.5, 'datasource3': 0.7, 'datasource4':0.9}
+federation2 = {'datasource2': 0.9, 'datasource3': 0.7, 'datasource5': 0.1, 'datasource6': 0.75}
 
 #check deviation
 def deviation():
@@ -70,20 +70,34 @@ def add(self, key, value):
 #each transaction = monitoring period, one product participates. One product is composed of 2 datasources
 #each datasource may or may not follow the same distribution with the other datasource of the same product
 #the distribution declares the random values that the objective metrics, of the same quality class, will take  
-def choose_distribution(product, target_value, datasource):
+def choose_distribution(product, target_value, datasource, minmax):
     #all datasources follow uniform good distribution with low deviation(=low noise, values near to mean value)
+    print('ppppppppppppppppppp', minmax, product)
     if (product == 'product1'): #first transaction = first monitoring period
-        actual_value = random.uniform(target_value-0.25, 1.0) #good with low deviation
-        deviation_actual_value = numpy.std(actual_value)
+        if (minmax == 'min'):
+            actual_value = random.uniform(target_value, 1.0) #good with low deviation
+            deviation_actual_value = numpy.std(actual_value)
+        if (minmax == 'max'):
+            actual_value = random.uniform(0.1, target_value) #good with low deviation
+            deviation_actual_value = numpy.std(actual_value)
     #datasources follow different uniform distributions 
     #candidate_values = []
     if (product == 'product2' or product == 'product3'): #second transaction = second monitoring period
-        if (datasource == 'datasource3'):
-            actual_value = random.uniform(target_value-0.25, 1.0) #good with high deviation
-            deviation_actual_value = numpy.std(actual_value)
-        if (datasource == 'datasource2' or'datasource4'):
-            actual_value = random.uniform(target_value-0.25, 1.0) #bad with high deviation
-            deviation_actual_value = numpy.std(actual_value)
+        if (datasource == 'datasource1' or'datasource3' or'datasource5'):
+            print('ppppppppppppppppppp', minmax, datasource)
+            if (minmax == 'min'):
+                actual_value = random.uniform(target_value-0.01, 1.0) #good with high deviation
+                deviation_actual_value = numpy.std(actual_value)
+            if (minmax == 'max'):
+                actual_value = random.uniform(0.01, target_value+0.25) #good with high deviation
+                deviation_actual_value = numpy.std(actual_value)
+        if (datasource == 'datasource2' or'datasource4' or'datasource6'):
+            if (minmax == 'min'):
+                actual_value = random.uniform(target_value-0.01, 1.0) #bad with high deviation
+                deviation_actual_value = numpy.std(actual_value)
+            if (minmax == 'min'):
+                actual_value = random.uniform(0.01, target_value+0.25) #bad with high deviation
+                deviation_actual_value = numpy.std(actual_value)
         #actual_value1 = random.uniform(target_value-0.25, 1.0) #bad with low deviation
         #candidate_values.append(actual_value1)
         #actual_value2 = random.uniform(target_value-0.25, 1.0) #good with low deviation
@@ -98,8 +112,12 @@ def choose_distribution(product, target_value, datasource):
         #deviation_actual_value = numpy.std(actual_value)
     #all datasources follow uniform bad distribution with high deviation(=high noise, values dispare)
     if (product == 'product4'): #forth transaction = forth monitoring period
-        actual_value = random.uniform(target_value-0.25, 1.0) #bad with low deviation
-        deviation_actual_value = numpy.std(actual_value)
+        if (minmax == 'min'):
+            actual_value = random.uniform(0.1, target_value) #bad with low deviation
+            deviation_actual_value = numpy.std(actual_value)
+        if (minmax == 'max'):
+            actual_value = random.uniform(target_value, 1.0) #bad with low deviation
+            deviation_actual_value = numpy.std(actual_value)
     return actual_value;
 
 #This function calculates the objective score of each resource of each quality class per monitoring period(=transaction period)
@@ -116,9 +134,9 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
             #same for both service classes 
             min_max = {'availability':'min', 'latency':'max', 'noise':'max'}
             target_value = quality_class1[i]
-            actual_value = choose_distribution(product, target_value, j)
-            deviation_actual_value = numpy.std(actual_value)
             minmax = min_max[i]
+            actual_value = choose_distribution(product, target_value, j, minmax)
+            deviation_actual_value = numpy.std(actual_value)
             print ('the objective metric is: ', i)
             print ('target value:', target_value)
             print ('actual value:', actual_value)
@@ -148,9 +166,9 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
         for i in quality_class2:
             min_max = {'availability':'min', 'latency':'max', 'noise':'max'}
             target_value = quality_class2[i]
-            actual_value = choose_distribution(product, target_value, j)
-            deviation_actual_value = numpy.std(actual_value)
             minmax = min_max[i]
+            actual_value = choose_distribution(product, target_value, j, minmax)
+            deviation_actual_value = numpy.std(actual_value)
             print ('the objective metric is: ', i)
             print ('target value:', target_value)
             print ('actual value:', actual_value)
@@ -278,11 +296,11 @@ def reputation_update_federations(final_reputation):
         if (contains(final_reputation, federation2, i) == True):
             current_federation2 = current_federation2 + final_reputation[i]*federation2[i]
     #there is no need to see the old value of the federation as the datasources already taking into account the old values 
-    final_federation1 = current_federation1 / len(federation1)
+    final_federation1 = current_federation1 / sum(federation1.values())
     reputation_old_federations['federation1'] = final_federation1
-    final_federation2 = current_federation2 / len(federation2)
+    final_federation2 = current_federation2 / sum(federation2.values())
     reputation_old_federations['federation2'] = final_federation2
-    print("OMGGGGGGGGGGGGGGGGG", reputation_old_federations)
+    #print("OMGGGGGGGGGGGGGGGGG", reputation_old_federations)
     return reputation_old_federations;
 
 #update current product of the traction and the affected ones that may have one or multiple common datasources
@@ -292,28 +310,28 @@ def reputation_update_products(final_reputation):
         if(contains(final_reputation, product1, i)== True):
             #print("FUCKKKKKKKKKKKKKKKKKKKKK", final_reputation[i], product1_weights[i])
             current_product1 = current_product1 + final_reputation[i]*product1[i]
-    final_product1 = current_product1/len(product1)
+    final_product1 = current_product1/sum(product1.values())
     reputation_old_products['product1']=final_product1
 
     current_product2=0
     for i in final_reputation:
         if(contains(final_reputation, product2, i)== True):
             current_product2 = current_product2 + final_reputation[i]*product2[i]
-    final_product2 = current_product2/len(product2)
+    final_product2 = current_product2/sum(product2.values())
     reputation_old_products['product2']=final_product2
 
     current_product3=0
     for i in final_reputation:
         if(contains(final_reputation, product3, i)== True):
             current_product3 = current_product3 + final_reputation[i]*product3[i]
-    final_product3 = current_product3/len(product3)
+    final_product3 = current_product3/sum(product3.values())
     reputation_old_products['product3']=final_product3
 
     current_product4=0
     for i in final_reputation:
         if(contains(final_reputation, product4, i)== True):
             current_product4 = current_product4 + final_reputation[i]*product4[i]
-    final_product4 = current_product4/len(product4)
+    final_product4 = current_product4/sum(product4.values())
     reputation_old_products['product4']=final_product4
 
     print ("productsssssssssssssssssssssssssssss", reputation_old_products)
