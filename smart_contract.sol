@@ -7,7 +7,11 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Implements purchashing process along with voting process
  * @ Lydia Athanasiou
  */
+<<<<<<< HEAD
 contract reputation{
+=======
+contract smart_contract{
+>>>>>>> e42312be26c6dff486ed3244c8a2cde62d4b153a
 
     // The address of the stored product
     address public productAddress;

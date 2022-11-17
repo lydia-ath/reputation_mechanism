@@ -1,6 +1,8 @@
 import numpy
 import matplotlib.pyplot as plt
 import random
+#from scipy.stats import uniform
+
 
 #global variables, dictionairies, lists
 
@@ -55,6 +57,16 @@ def deviation():
     plt.show()
 
     return print(x)
+
+#uniform distribution
+def uniform_distribution():
+    n = 10000
+    start = 10
+    width = 20
+    data_uniform = uniform.rvs(size=n, loc = start, scale=width)
+    ax = sns.distplot(data_uniform, bins=100, kde=True, color='skyblue', hist_kws={"linewidth": 15,'alpha':1})
+    ax.set(xlabel='Uniform Distribution ', ylabel='Frequency')
+    return ax
 
 #help function 
 def contains(diction1, diction2, key):
@@ -218,7 +230,7 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
     for i in objective_scores:
         objective_updated = lamda*objective_old[i] + (1-lamda)*objective_scores[i]
         add(objective_old, i, objective_updated)
-    #print ("looooooolllllllllllllll", objective_old)
+    print ("looooooolllllllllllllll", objective_old)
 
     #update subjective score by taking into account the old values
     if(product == 'product1'):
@@ -350,6 +362,8 @@ def main():
         reputation_update_providers(final_Reputation_per_datasource)
         reputation_update_federations(final_Reputation_per_datasource)
         reputation_update_products(final_Reputation_per_datasource)
+        #uniform_distribution()
+        #deviation()
 
 if __name__ == "__main__":
     main()
