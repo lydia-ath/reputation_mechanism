@@ -105,10 +105,10 @@ def choose_distribution(product, target_value, datasource, minmax):
                 deviation_actual_value = numpy.std(actual_value)
         if (datasource == 'datasource2' or'datasource4' or'datasource6'):
             if (minmax == 'min'):
-                actual_value = random.uniform(target_value-0.01, 1.0) #bad with high deviation
+                actual_value = random.uniform(target_value-0.01, 1.0) #bad with low deviation
                 deviation_actual_value = numpy.std(actual_value)
             if (minmax == 'min'):
-                actual_value = random.uniform(0.01, target_value+0.25) #bad with high deviation
+                actual_value = random.uniform(0.01, target_value+0.25) #bad with low deviation
                 deviation_actual_value = numpy.std(actual_value)
         #actual_value1 = random.uniform(target_value-0.25, 1.0) #bad with low deviation
         #candidate_values.append(actual_value1)
@@ -125,10 +125,10 @@ def choose_distribution(product, target_value, datasource, minmax):
     #all datasources follow uniform bad distribution with high deviation(=high noise, values dispare)
     if (product == 'product4'): #forth transaction = forth monitoring period
         if (minmax == 'min'):
-            actual_value = random.uniform(0.1, target_value) #bad with low deviation
+            actual_value = random.uniform(0.1, target_value) #bad with big deviation
             deviation_actual_value = numpy.std(actual_value)
         if (minmax == 'max'):
-            actual_value = random.uniform(target_value, 1.0) #bad with low deviation
+            actual_value = random.uniform(target_value, 1.0) #bad with big deviation
             deviation_actual_value = numpy.std(actual_value)
     return actual_value;
 
@@ -213,10 +213,17 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
     print(Objective_scores)
     return Objective_scores;
 
-def subjective():
-    subjective_score = random.uniform(0.1, 1.0)
-    deviation_actual_value = numpy.std(subjective_score)
-    print (deviation_actual_value)
+def subjective(product):
+    print (product)
+    if (product == "product1" or product == "product2"):
+        subjective_score = random.uniform(0.5, 1.0) # medium to good subjective score
+        deviation_actual_value = numpy.std(subjective_score)
+        print (deviation_actual_value)
+    if (product == "product3" or product == "product4"):
+        subjective_score = random.uniform(0.1, 0.5) # bad to medium subjective score
+        deviation_actual_value = numpy.std(subjective_score)
+        print (deviation_actual_value)
+
     return subjective_score;
 
 def reputation_update_datasources(objective_scores, subjective_score, product):
@@ -354,8 +361,8 @@ def main():
     transactions = ['product1', 'product2', 'product3', 'product4']
     #4 transactions with 1 product per transaction, each product is composed of 2 datasources
     for i in transactions:
-        print ("-----------------------------------------------Transaction for",i, "-------------------------------------------------------------------")
-        product_subjective = subjective()
+        print ("-----------------------------------------------Transaction for",i,"-------------------------------------------------------------------")
+        product_subjective = subjective(i)
         #where monitoring period = transaction period
         objective_for_monitoring_period = objective(quality_class1, quality_class2, quality_class1_resources, quality_class2_resources, i)
         final_Reputation_per_datasource =reputation_update_datasources(objective_for_monitoring_period, product_subjective, i)
@@ -366,4 +373,9 @@ def main():
         #deviation()
 
 if __name__ == "__main__":
-    main()
+    n=0
+    while (n<10):
+        print ("-----------------------------------------------Round",n,"----------------------------------------------------------------------------")
+
+        main()
+        n = n+1
