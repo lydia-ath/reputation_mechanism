@@ -87,10 +87,10 @@ def choose_distribution(product, target_value, datasource, minmax):
     print('ppppppppppppppppppp', minmax, product)
     if (product == 'product1'): #first transaction = first monitoring period
         if (minmax == 'min'):
-            actual_value = random.uniform(target_value, 1.0) #good with low deviation
+            actual_value = random.uniform(target_value-0.02, target_value +0.15) #good with low deviation
             deviation_actual_value = numpy.std(actual_value)
         if (minmax == 'max'):
-            actual_value = random.uniform(0.1, target_value) #good with low deviation
+            actual_value = random.uniform(target_value-0.05, target_value+0.01) #good with low deviation
             deviation_actual_value = numpy.std(actual_value)
     #datasources follow different uniform distributions 
     #candidate_values = []
@@ -98,17 +98,17 @@ def choose_distribution(product, target_value, datasource, minmax):
         if (datasource == 'datasource1' or'datasource3' or'datasource5'):
             print('ppppppppppppppppppp', minmax, datasource)
             if (minmax == 'min'):
-                actual_value = random.uniform(target_value-0.01, 1.0) #good with high deviation
+                actual_value = random.uniform(target_value-0.1, target_value + 0.1) #good with high deviation
                 deviation_actual_value = numpy.std(actual_value)
             if (minmax == 'max'):
-                actual_value = random.uniform(0.01, target_value+0.25) #good with high deviation
+                actual_value = random.uniform(target_value-0.2, target_value+0.01) #good with high deviation
                 deviation_actual_value = numpy.std(actual_value)
         if (datasource == 'datasource2' or'datasource4' or'datasource6'):
             if (minmax == 'min'):
-                actual_value = random.uniform(target_value-0.01, 1.0) #bad with low deviation
+                actual_value = random.uniform(target_value-0.5, target_value + 0.01) #bad with low deviation
                 deviation_actual_value = numpy.std(actual_value)
-            if (minmax == 'min'):
-                actual_value = random.uniform(0.01, target_value+0.25) #bad with low deviation
+            if (minmax == 'max'):
+                actual_value = random.uniform(target_value-0.01, target_value+0.05) #bad with low deviation
                 deviation_actual_value = numpy.std(actual_value)
         #actual_value1 = random.uniform(target_value-0.25, 1.0) #bad with low deviation
         #candidate_values.append(actual_value1)
@@ -125,10 +125,10 @@ def choose_distribution(product, target_value, datasource, minmax):
     #all datasources follow uniform bad distribution with high deviation(=high noise, values dispare)
     if (product == 'product4'): #forth transaction = forth monitoring period
         if (minmax == 'min'):
-            actual_value = random.uniform(0.1, target_value) #bad with big deviation
+            actual_value = random.uniform(target_value-0.2, target_value+0.01) #bad with big deviation
             deviation_actual_value = numpy.std(actual_value)
         if (minmax == 'max'):
-            actual_value = random.uniform(target_value, 1.0) #bad with big deviation
+            actual_value = random.uniform(target_value-0.01, target_value + 0.2) #bad with big deviation
             deviation_actual_value = numpy.std(actual_value)
     return actual_value;
 
@@ -374,8 +374,8 @@ def main():
 
 if __name__ == "__main__":
     n=0
-    while (n<10):
-        print ("-----------------------------------------------Round",n,"----------------------------------------------------------------------------")
+    #while (n<10):
+    #    print ("-----------------------------------------------Round",n,"----------------------------------------------------------------------------")
 
-        main()
-        n = n+1
+    main()
+    #    n = n+1
