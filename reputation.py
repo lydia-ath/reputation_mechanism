@@ -87,7 +87,7 @@ def choose_distribution(product, target_value, datasource, minmax):
     print('ppppppppppppppppppp', minmax, product)
     if (product == 'product1'): #first transaction = first monitoring period
         if (minmax == 'min'):
-            actual_value = random.uniform(target_value-0.02, target_value +0.15) #good with low deviation
+            actual_value = random.uniform(target_value-0.02, target_value +0.05) #good with low deviation
             deviation_actual_value = numpy.std(actual_value)
         if (minmax == 'max'):
             actual_value = random.uniform(target_value-0.05, target_value+0.01) #good with low deviation
