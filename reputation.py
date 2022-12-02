@@ -24,12 +24,12 @@ quality_class1_weights = {'availability':0.5, 'latency':0.3, 'noise':0.2}
 quality_class2_weights = {'availability':0.2, 'latency':0.7, 'noise':0.1}
 
 #initialization of reputation scores 
-objective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
-subjective_old = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
+objective_old = {'datasource1':0.5, 'datasource2':0.5, 'datasource3':0.5, 'datasource4':0.5, 'datasource5':0.5, 'datasource6':0.5}
+subjective_old = {'datasource1':0.5, 'datasource2':0.5, 'datasource3':0.5, 'datasource4':0.5, 'datasource5':0.5, 'datasource6':0.5}
 
-reputation_old_providers = {'provider1':0.0, 'provider2':0.0, 'provider3':0.0, 'provider4':0.0, 'provider5':0.0, 'provider6':0.0}
-reputation_old_federations = {'federation1': 0.0, 'federation2': 0.0}
-reputation_old_products = {'product1': 0.0, 'product2': 0.0, 'product3': 0.0, 'product4': 0.0}
+reputation_old_providers = {'provider1':0.5, 'provider2':0.5, 'provider3':0.5, 'provider4':0.5, 'provider5':0.5, 'provider6':0.5}
+reputation_old_federations = {'federation1': 0.5, 'federation2': 0.5}
+reputation_old_products = {'product1': 0.5, 'product2': 0.5, 'product3': 0.5, 'product4': 0.5}
 
 final_reputation_scores = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
 
@@ -243,13 +243,14 @@ def subjective_vector_choise(product):
 
 
 def subjective(product, subjective_metrics):
+    subjective_score = 0
     if(product == "product1" or product == "product2"):
         for i in subjective_metrics:
-            subjective_score = subjective_metrics[i]*subjective_metrics_weights1[i]
+            subjective_score =  subjective_score + subjective_metrics[i]*subjective_metrics_weights1[i]
     if(product == "product3" or product == "product4"):
         for i in subjective_metrics:
-            subjective_score = subjective_metrics[i]*subjective_metrics_weights2[i]
-    print ("final subjective score of product ", product, ":", subjective_score)
+            subjective_score = subjective_score + subjective_metrics[i]*subjective_metrics_weights2[i]
+    print ("final subjective score of ", product, ":", subjective_score)
     return subjective_score;
 
 def reputation_update_datasources(objective_scores, subjective_score, product):
@@ -326,7 +327,7 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
 def reputation_update_providers(final_reputation):
     for i in final_reputation:
         reputation_old_providers = final_reputation
-    #print ("providersssssssssss", reputation_old_providers)
+    print ("providersssssssssss", reputation_old_providers)
     return reputation_old_providers;
 
 #federation 1 --> provider1,2,3,4 --> datasource1,2,3,4
@@ -345,7 +346,7 @@ def reputation_update_federations(final_reputation):
     reputation_old_federations['federation1'] = final_federation1
     final_federation2 = current_federation2 / sum(federation2.values())
     reputation_old_federations['federation2'] = final_federation2
-    #print("OMGGGGGGGGGGGGGGGGG", reputation_old_federations)
+    print("OMGGGGGGGGGGGGGGGGG", reputation_old_federations)
     return reputation_old_federations;
 
 #update current product of the traction and the affected ones that may have one or multiple common datasources
@@ -403,11 +404,18 @@ def main():
         final_Reputation_datasource = []
         for j in final_Reputation_per_datasource:
             final_Reputation_datasource.append(final_Reputation_per_datasource[j])
-        print (final_Reputation_datasource)
-        print (datasources)
+        sns.set_style("whitegrid")
+        plt.figure(figsize=(12,6))
         plt.xlabel('datasources')
         plt.ylabel('reputation scores')
         plt.plot(datasources, final_Reputation_datasource)
+        plt.show()
+
+        final_Reputation_feferations = []
+        for j in reputation_old_federations:
+            final_Reputation_feferations.append(reputation_old_federations[j])
+        federation = ['federation1', 'federation2']
+        plt.plot(federation, final_Reputation_feferations)
         plt.show()
 
         if (i == 'product1'):
@@ -460,7 +468,10 @@ def main():
     plt.bar(transactions, final_Reputation_products3)
     plt.bar(transactions, final_Reputation_products4)
     plt.show()
-
+    plt.plot(federation, final_Reputation_feferations, marker = 'o')
+    plt.show()
+    plt.bar(federation, final_Reputation_feferations)
+    plt.show()
 if __name__ == "__main__":
     n=0
     #while (n<10):
