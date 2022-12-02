@@ -1,10 +1,15 @@
 import numpy
 import matplotlib.pyplot as plt
 import random
+import seaborn as sns
 #from scipy.stats import uniform
 
 
 #global variables, dictionairies, lists
+subjective_metrics = {'accuracy': 0.0, 'availability': 0.0, 'validity':0.0}
+subjective_metrics_weights1 = {'accuracy': 0.5, 'availability': 0.3, 'validity':0.2}
+subjective_metrics_weights2 = {'accuracy': 0.1, 'availability': 0.1, 'validity':0.8}
+
 
 #quality class metrics and target values
 quality_class1 = {'availability':0.9, 'latency':0.2, 'noise':0.2}
@@ -213,24 +218,45 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
     print(Objective_scores)
     return Objective_scores;
 
-def subjective(product):
-    print (product)
-    if (product == "product1" or product == "product2"):
-        subjective_score = random.uniform(0.5, 1.0) # medium to good subjective score
-        deviation_actual_value = numpy.std(subjective_score)
-        print (deviation_actual_value)
-    if (product == "product3" or product == "product4"):
-        subjective_score = random.uniform(0.1, 0.5) # bad to medium subjective score
-        deviation_actual_value = numpy.std(subjective_score)
-        print (deviation_actual_value)
+#one subjective profile per application type
+#products that belong to the same application type have same subjective vector 
+#User specific --> per transaction --> use can select the weight and/or the subjective metrics,
+def subjective_vector_choise(product):
+    if (product == "product1"):
+        for i in subjective_metrics:
+            subjective_metric_value = random.uniform(0.8, 1)
+            deviation_actual_value = numpy.std(subjective_metric_value)
+            add(subjective_metrics, i, subjective_metric_value)
+    if (product == "product2" or product == "product3"):
+        for i in subjective_metrics:
+            subjective_metric_value = random.uniform(0.2, 0.8)
+            deviation_actual_value = numpy.std(subjective_metric_value)
+            add(subjective_metrics, i, subjective_metric_value)
+    if (product == "product4"):
+        for i in subjective_metrics:
+            subjective_metric_value = random.uniform(0, 0.2)
+            deviation_actual_value = numpy.std(subjective_metric_value)
+            add(subjective_metrics, i, subjective_metric_value)
+            print (deviation_actual_value)
+    print ("subjective metrics for transaction of product ", product, ":", subjective_metrics)
+    return subjective_metrics;
 
+
+def subjective(product, subjective_metrics):
+    if(product == "product1" or product == "product2"):
+        for i in subjective_metrics:
+            subjective_score = subjective_metrics[i]*subjective_metrics_weights1[i]
+    if(product == "product3" or product == "product4"):
+        for i in subjective_metrics:
+            subjective_score = subjective_metrics[i]*subjective_metrics_weights2[i]
+    print ("final subjective score of product ", product, ":", subjective_score)
     return subjective_score;
 
 def reputation_update_datasources(objective_scores, subjective_score, product):
     print("innnnnnnnnnn objectives", objective_scores)
     print("innnnnnnnnnn subjective", subjective_score)
     print("innnnnnnnnnn product", product)
-    #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different service/quqlity classes
+    #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different services/quality classes
     #so they will have multiple values in the same monitoring period based on those quality classes
     
     #update objective score by taking into account the old values
@@ -359,23 +385,84 @@ def reputation_update_products(final_reputation):
 def main():
 
     transactions = ['product1', 'product2', 'product3', 'product4']
+    final_Reputation_products1 = []
+    final_Reputation_products2 = []
+    final_Reputation_products3 = []
+    final_Reputation_products4 = []
     #4 transactions with 1 product per transaction, each product is composed of 2 datasources
     for i in transactions:
         print ("-----------------------------------------------Transaction for",i,"-------------------------------------------------------------------")
-        product_subjective = subjective(i)
-        #where monitoring period = transaction period
+        subjective_metrics_per_transaction = subjective_vector_choise(i)
+        product_subjective = subjective(i, subjective_metrics_per_transaction)
+        #assumption: where monitoring period = transaction period
         objective_for_monitoring_period = objective(quality_class1, quality_class2, quality_class1_resources, quality_class2_resources, i)
         final_Reputation_per_datasource =reputation_update_datasources(objective_for_monitoring_period, product_subjective, i)
         reputation_update_providers(final_Reputation_per_datasource)
         reputation_update_federations(final_Reputation_per_datasource)
         reputation_update_products(final_Reputation_per_datasource)
-        #uniform_distribution()
-        #deviation()
+        final_Reputation_datasource = []
+        for j in final_Reputation_per_datasource:
+            final_Reputation_datasource.append(final_Reputation_per_datasource[j])
+        print (final_Reputation_datasource)
+        print (datasources)
+        plt.xlabel('datasources')
+        plt.ylabel('reputation scores')
+        plt.plot(datasources, final_Reputation_datasource)
+        plt.show()
+
+        if (i == 'product1'):
+            for j in reputation_old_products:
+                final_Reputation_products1.append(reputation_old_products[j])
+            plt.xlabel('transactions - products')
+            plt.ylabel('reputation scores of products')
+            plt.plot(transactions, final_Reputation_products1)
+            plt.show()
+            plt.bar(transactions, final_Reputation_products1)
+            plt.show()
+        if (i == 'product2'):
+            for j in reputation_old_products:
+                final_Reputation_products2.append(reputation_old_products[j])
+            plt.xlabel('transactions - products')
+            plt.ylabel('reputation scores of products')
+            plt.plot(transactions, final_Reputation_products2)
+            plt.show()
+            plt.bar(transactions, final_Reputation_products2)
+            plt.show()
+        if (i == 'product3'):
+            for j in reputation_old_products:
+                final_Reputation_products3.append(reputation_old_products[j])
+            plt.xlabel('transactions - products')
+            plt.ylabel('reputation scores of products')
+            plt.plot(transactions, final_Reputation_products3)
+            plt.show()
+            plt.bar(transactions, final_Reputation_products3)
+            plt.show()
+        if (i == 'product4'):
+            for j in reputation_old_products:
+                final_Reputation_products4.append(reputation_old_products[j])
+            plt.xlabel('transactions - products')
+            plt.ylabel('reputation scores of products')
+            plt.plot(transactions, final_Reputation_products4)
+            plt.show()
+            plt.bar(transactions, final_Reputation_products4)
+            plt.show()
+    sns.set_style("whitegrid")
+    plt.figure(figsize=(12,6))
+    plt.xlabel('transactions - products')
+    plt.ylabel('reputation scores of products')
+    plt.plot(transactions, final_Reputation_products1, marker = 'o')
+    plt.plot(transactions, final_Reputation_products2, marker = 'o')
+    plt.plot(transactions, final_Reputation_products3, marker = 'o')
+    plt.plot(transactions, final_Reputation_products4, marker = 'o')
+    plt.show()
+    plt.bar(transactions, final_Reputation_products1)
+    plt.bar(transactions, final_Reputation_products2)
+    plt.bar(transactions, final_Reputation_products3)
+    plt.bar(transactions, final_Reputation_products4)
+    plt.show()
 
 if __name__ == "__main__":
     n=0
     #while (n<10):
     #    print ("-----------------------------------------------Round",n,"----------------------------------------------------------------------------")
-
     main()
-    #    n = n+1
