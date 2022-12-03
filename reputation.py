@@ -215,7 +215,7 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
             print (n, " belogns to multiple quality classes and its final reputation score is: ", final_objective_score)
             add(Objective_scores, n, final_objective_score)
     
-    print(Objective_scores)
+    print("6666666666666666666", Objective_scores)
     return Objective_scores;
 
 #one subjective profile per application type
@@ -391,16 +391,37 @@ def main():
     final_Reputation_products3 = []
     final_Reputation_products4 = []
     #4 transactions with 1 product per transaction, each product is composed of 2 datasources
+    subjective_metrics_names = ['accuracy', 'validity', 'value for money']
     for i in transactions:
         print ("-----------------------------------------------Transaction for",i,"-------------------------------------------------------------------")
         subjective_metrics_per_transaction = subjective_vector_choise(i)
+        subjective_values = []
         product_subjective = subjective(i, subjective_metrics_per_transaction)
         #assumption: where monitoring period = transaction period
+        objective_values = []
         objective_for_monitoring_period = objective(quality_class1, quality_class2, quality_class1_resources, quality_class2_resources, i)
         final_Reputation_per_datasource =reputation_update_datasources(objective_for_monitoring_period, product_subjective, i)
         reputation_update_providers(final_Reputation_per_datasource)
         reputation_update_federations(final_Reputation_per_datasource)
         reputation_update_products(final_Reputation_per_datasource)
+
+        #Graphical representation of the subjective scores choises per transaction
+        for j in subjective_metrics_per_transaction:
+            subjective_values.append(subjective_metrics_per_transaction[j])
+        plt.xlabel('subjective metrics')
+        plt.ylabel('values of subjective metrics per transaction')
+        plt.plot(subjective_metrics_names, subjective_values)
+        plt.show()
+
+        #Graphical representation of the objective scores per monitoring period
+        for j in objective_for_monitoring_period:
+            objective_values.append(objective_for_monitoring_period[j])
+        plt.xlabel('objective metrics')
+        plt.ylabel('values of objective metrics per monitoring period')
+        plt.plot(datasources, objective_values)
+        plt.show()
+
+        #Graphical representation of the reputation scores per datasource (combination subjective and objective)
         final_Reputation_datasource = []
         for j in final_Reputation_per_datasource:
             final_Reputation_datasource.append(final_Reputation_per_datasource[j])
@@ -411,6 +432,7 @@ def main():
         plt.plot(datasources, final_Reputation_datasource)
         plt.show()
 
+        #Graphical representation of the reputation scores per federation
         final_Reputation_feferations = []
         for j in reputation_old_federations:
             final_Reputation_feferations.append(reputation_old_federations[j])
@@ -418,6 +440,7 @@ def main():
         plt.plot(federation, final_Reputation_feferations)
         plt.show()
 
+        #Graphical representation of the reputation scores per product
         if (i == 'product1'):
             for j in reputation_old_products:
                 final_Reputation_products1.append(reputation_old_products[j])
@@ -454,6 +477,7 @@ def main():
             plt.show()
             plt.bar(transactions, final_Reputation_products4)
             plt.show()
+        
     sns.set_style("whitegrid")
     plt.figure(figsize=(12,6))
     plt.xlabel('transactions - products')
