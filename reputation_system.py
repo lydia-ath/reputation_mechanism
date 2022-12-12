@@ -7,7 +7,7 @@ from sci_analysis import analyze
 import numpy as np
 #from scipy.stats import uniform
 
-thita = 0
+
 #global variables, dictionairies, lists
 subjective_metrics = {'accuracy': 0.0, 'availability': 0.0, 'validity':0.0}
 subjective_metrics_weights1 = {'accuracy': 0.5, 'availability': 0.3, 'validity':0.2}
@@ -32,14 +32,12 @@ subjective_old = {'datasource1':0.5, 'datasource2':0.5, 'datasource3':0.5, 'data
 
 reputation_old_providers = {'provider1':0.5, 'provider2':0.5, 'provider3':0.5, 'provider4':0.5, 'provider5':0.5, 'provider6':0.5}
 reputation_old_federations = {'federation1': 0.5, 'federation2': 0.5}
-reputation_old_products = {'product1': 0.9, 'product2': 0.8, 'product3': 0.1, 'product4': 0.7}
+reputation_old_products = {'product1': 0.8, 'product2': 0.8, 'product3': 0.8, 'product4': 0.8}
 
-final_reputation_scores = {'datasource1':0.0, 'datasource2':0.0, 'datasource3':0.0, 'datasource4':0.0, 'datasource5':0.0, 'datasource6':0.0}
+final_reputation_scores = {'datasource1':0.5, 'datasource2':0.5, 'datasource3':0.5, 'datasource4':0.5, 'datasource5':0.5, 'datasource6':0.5}
 
 #global variables
 lamda = 0.8
-weight = 0.8
-thita = 0
 #product 1 and porduct 2 belongs to service class 1 and have quality class 1
 product1 = {'datasource1':0.8, 'datasource2':0.6}
 product2= {'datasource3':0.7, 'datasource4':0.9}
@@ -51,6 +49,8 @@ product4 = {'datasource5':0.8, 'datasource6':0.8}
 #so they will have multiple values in the same monitoring period based on those quality classes
 datasources = ['datasource1', 'datasource2', 'datasource3', 'datasource4', 'datasource5', 'datasource6']
 
+#find the lier and diminish his weight of contribution
+weights_of_contribution = {'datasource1':0.8, 'datasource2':0.8, 'datasource3':0.8, 'datasource4':0.8, 'datasource5':0.8, 'datasource6':0.8}
 
 federation1 = {'datasource1': 0.7, 'datasource2': 0.5, 'datasource3': 0.7, 'datasource4':0.9}
 federation2 = {'datasource2': 0.9, 'datasource3': 0.7, 'datasource5': 0.1, 'datasource6': 0.75}
@@ -208,7 +208,7 @@ def subjective(product, subjective_metrics):
     print ("final subjective score of ", product, ":", subjective_score)
     return subjective_score;
 
-def reputation_update_datasources(objective_scores, subjective_score, product, weight):
+def reputation_update_datasources(objective_scores, subjective_score, product):
     #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different services/quality classes
     #so they will have multiple values in the same monitoring period based on those quality classes
     
@@ -224,26 +224,19 @@ def reputation_update_datasources(objective_scores, subjective_score, product, w
             print("......................", i)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
             add(subjective_old, i, subjective_updated)
-            #final reputation score after the combination of subjective and objective for the datasources of product 1
-            #where the objective_old and the subjective_old dictionaries are now updated 
-            if ((objective_scores[i] - subjective_score) > 0.5):
-                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                print ("weighttttttttttttttttttttttt", weight)
-                if (weight>0.15):
-                    weight -=0.1
-                    print ("weighttttttttttttttttttttttt", weight)
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+            #final reputation score after the combination of subjective and objective of the datasources
+            #where the objective_old and the subjective_old dictionaries are now updated
+            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
+                print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                if (weights_of_contribution[i]>0.15):
+                    weights_of_contribution[i] -=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((objective_scores[i] - subjective_score) < 0.2):
-                if (weight<0.85):
-                    print("iiiiiiiiiiiiiiiiiiiiiiiiiiii2222222222",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                    weight +=0.1
-                    print ("weighttttttttttttttttttttttt", weight)
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
-                    add(final_reputation_scores, i, final_reputation)
-            if ((0.2 < (objective_scores[i] - subjective_score) < 0.5) or ((objective_scores[i] - subjective_score)<0)):
+            else:
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii1111133333333333333",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                 add(final_reputation_scores, i, final_reputation)
 
     if(product == 'product2'):
@@ -254,46 +247,51 @@ def reputation_update_datasources(objective_scores, subjective_score, product, w
             add(subjective_old, i, subjective_updated)
 
             #final reputation score after the combination of subjective and objective
-            if ((objective_scores[i] - subjective_score) > 0.5):
-                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                if (weight>0.15):
-                    weight -=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
+                print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                if (weights_of_contribution[i]>0.15):
+                    weights_of_contribution[i] -=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((objective_scores[i] - subjective_score) < 0.2):
-                if (weight<0.85):
+            if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
+                if (weights_of_contribution[i]<0.85):
                     print("iiiiiiiiiiiiiiiiiiiiiiiiiiii2222222222",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                    weight +=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                    weights_of_contribution[i] +=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((0.2 < (objective_scores[i] - subjective_score) < 0.5) or ((objective_scores[i] - subjective_score)<0)):
+            else:
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii1111133333333333333",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                 add(final_reputation_scores, i, final_reputation)
 
     if(product == 'product3'):
         for i in product3:
             print("......................", i)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
-            print (subjective_updated)
             add(subjective_old, i, subjective_updated)
 
             #final reputation score after the combination of subjective and objective
-            if ((objective_scores[i] - subjective_score) > 0.5):
-                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                if (weight>0.15):
-                    weight -=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
+                print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                if (weights_of_contribution[i]>0.15):
+                    weights_of_contribution[i] -=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((objective_scores[i] - subjective_score )< 0.2):
-                if (weight<0.85):
+            if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
+                if (weights_of_contribution[i]<0.85):
                     print("iiiiiiiiiiiiiiiiiiiiiiiiiiii2222222222",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                    weight +=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                    weights_of_contribution[i] +=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((0.2 < (objective_scores[i] - subjective_score) < 0.5) or ((objective_scores[i] - subjective_score)<0)):
+            else:
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii1111133333333333333",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                 add(final_reputation_scores, i, final_reputation)
 
     if(product == 'product4'):
@@ -304,25 +302,28 @@ def reputation_update_datasources(objective_scores, subjective_score, product, w
             add(subjective_old, i, subjective_updated)
 
             #final reputation score after the combination of subjective and objective
-            if ((objective_scores[i] - subjective_score) > 0.5):
-                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                if (weight>0.15):
-                    weight -=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+                print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
+                print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                if (weights_of_contribution[i]>0.15):
+                    weights_of_contribution[i] -=0.1
+                    print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                    final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
-            if ((objective_scores[i] - subjective_score) < 0.2):
-                if (weight<0.85):
-                    print("iiiiiiiiiiiiiiiiiiiiiiiiiiii2222222222",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                    weight +=0.1
-                    final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
-                    add(final_reputation_scores, i, final_reputation)
-            if ((0.2 < (objective_scores[i] - subjective_score) < 0.5) or ((objective_scores[i] - subjective_score)<0)):
+                if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
+                    if (weights_of_contribution[i]<0.85):
+                        print("iiiiiiiiiiiiiiiiiiiiiiiiiiii2222222222",objective_scores[i], "oooooooooooooooooooo", subjective_score)
+                        weights_of_contribution[i] +=0.1
+                        print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
+                        final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
+                        add(final_reputation_scores, i, final_reputation)
+            else:
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii1111133333333333333",objective_scores[i], "oooooooooooooooooooo", subjective_score)
-                final_reputation = weight*objective_old[i] + (1-weight)*subjective_old[i]
+                final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                 add(final_reputation_scores, i, final_reputation)
-
+    print ('weights: ', weights_of_contribution)
     print ('final reputation scores: ', final_reputation_scores)
-    return final_reputation_scores, weight;
+    return final_reputation_scores;
 
 
 #provider 1 --> datasource1, provider2--> datasource2, etc
@@ -380,23 +381,23 @@ def reputation_update_products(final_reputation):
     final_product4 = current_product4/sum(product4.values())
     reputation_old_products['product4']=final_product4
 
+    print ("newwwwwwwww productsssssss", reputation_old_products)
     return reputation_old_products;
 
 def reputation(product):
-    weight = 0.8
     subjective_metrics_per_transaction = subjective_vector_choise(product)
     product_subjective = subjective(product, subjective_metrics_per_transaction)
     #assumption: where monitoring period = transaction period
     objective_for_monitoring_period = objective(quality_class1, quality_class2, quality_class1_resources, quality_class2_resources, product)
-    final_Reputation_per_datasource,weight =reputation_update_datasources(objective_for_monitoring_period, product_subjective, product,weight)
+    final_Reputation_per_datasource =reputation_update_datasources(objective_for_monitoring_period, product_subjective, product)
     reputation_update_providers(final_Reputation_per_datasource)
     reputation_update_federations(final_Reputation_per_datasource)
     reputation_update_products(final_Reputation_per_datasource)
 
 def main():
-    product1_counter, product2_counter, product3_counter,product4_counter = 0, 0, 0, 0
-
-    for i in range (0, 20):
+    Product_counters = [0,0,0,0]
+    products = ['product1', 'product2', 'product3', 'product4']
+    for i in range (0, 40):
         print ("-----------------------------------------------Transaction",i,"----------------------------------------------------------------------------")
         
         answer = input("Do you want a product of service class 1 or service class 2? ")
@@ -409,9 +410,9 @@ def main():
             choice = random.choices(class1_products, normalization_of_products_reputation)
             print(choice)
             if (choice[0] == "product1"): 
-                product1_counter = product1_counter + 1
+                Product_counters[0] += 1
             if (choice[0] == "product2"): 
-                product2_counter = product2_counter + 1
+                Product_counters[1] += 1
             reputation(choice[0])
 
         if (answer == '2'):
@@ -422,11 +423,25 @@ def main():
             choice = random.choices(class2_products, normalization_of_products_reputation)
             print(choice)
             if (choice[0] == "product3"): 
-                product3_counter = product3_counter + 1
+                Product_counters[2] += 1
             if (choice[0] == "product4"): 
-                product4_counter = product4_counter + 1
+                Product_counters[3] += 1
             reputation(choice[0])
-    print ("final counters", product1_counter, product2_counter, product3_counter,product4_counter)
+        
+    sns.set_style("whitegrid")
+    plt.figure(figsize=(12,6))
+    plt.xlabel('weights')
+    plt.ylabel('datasources')
+    plt.bar(datasources, weights_of_contribution.values())
+    plt.show()
+    print ("final weights", weights_of_contribution)
+    print ("final counters",  Product_counters)
+    sns.set_style("whitegrid")
+    plt.figure(figsize=(12,6))
+    plt.xlabel('transactions - products')
+    plt.ylabel('times that a product is being choosen')
+    plt.bar(products, Product_counters)
+    plt.show()
         
 if __name__ == "__main__":
 
