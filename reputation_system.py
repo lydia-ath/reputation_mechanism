@@ -183,7 +183,8 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
 def subjective_vector_choise(product):
     if (product == "product1"):
         for i in subjective_metrics:
-            subjective_metric_value = random.uniform(0, 0.2)
+            #subjective_metric_value = random.uniform(0, 0.2)
+            subjective_metric_value = random.uniform(0.8, 10)
             add(subjective_metrics, i, subjective_metric_value)
     if (product == "product2" or product == "product3"):
         for i in subjective_metrics:
@@ -226,11 +227,11 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
             add(subjective_old, i, subjective_updated)
             #final reputation score after the combination of subjective and objective of the datasources
             #where the objective_old and the subjective_old dictionaries are now updated
-            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+            if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
                 print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
-                if (weights_of_contribution[i]>0.15):
-                    weights_of_contribution[i] -=0.1
+                if (weights_of_contribution[i]<0.85):
+                    weights_of_contribution[i] +=0.1
                     print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
                     final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
@@ -397,6 +398,11 @@ def reputation(product):
 def main():
     Product_counters = [0,0,0,0]
     products = ['product1', 'product2', 'product3', 'product4']
+    transactions = ['product1', 'product2', 'product3', 'product4']
+    product1_repuration = []
+    products1_time = []
+    weights_of_datasource1 = []
+    weights_of_datasource2 = []
     for i in range (0, 40):
         print ("-----------------------------------------------Transaction",i,"----------------------------------------------------------------------------")
         
@@ -415,6 +421,16 @@ def main():
                 Product_counters[1] += 1
             reputation(choice[0])
 
+            #Graphical representation of the reputation scores per product
+            if (choice[0] == 'product1'):
+                product1_repuration.append(reputation_old_products[choice[0]])
+                products1_time.append(i)
+                for j in product1:
+                    if (j == 'datasource1'):
+                        weights_of_datasource1.append(weights_of_contribution[j])
+                    if (j == 'datasource2'):
+                        weights_of_datasource2.append(weights_of_contribution[j])
+
         if (answer == '2'):
             class2 = [reputation_old_products['product3'], reputation_old_products['product4']]
             class2_products = ['product3', 'product4']
@@ -427,7 +443,7 @@ def main():
             if (choice[0] == "product4"): 
                 Product_counters[3] += 1
             reputation(choice[0])
-        
+    
     sns.set_style("whitegrid")
     plt.figure(figsize=(12,6))
     plt.xlabel('weights')
@@ -442,7 +458,24 @@ def main():
     plt.ylabel('times that a product is being choosen')
     plt.bar(products, Product_counters)
     plt.show()
-        
+    print ("repuation score for product 1 in each transaction",  product1_repuration)
+    plt.xlabel('transaction that product 1 is being choosen')
+    plt.ylabel('reputation score per transaction')
+    plt.bar(products1_time, product1_repuration)
+    plt.show()
+    
+    print ("weights of datasource1 in case that provider1 is lying",  weights_of_datasource1)
+    plt.xlabel('transactions that datasource 1 participates')
+    plt.ylabel('weight per transaction')
+    plt.bar(products1_time, weights_of_datasource1)
+    plt.show()
+
+    print ("weights of datasource2 in case that provider 2 is lying",  weights_of_datasource2)
+    plt.xlabel('transactions that datasource 2 participates')
+    plt.ylabel('weight per transaction')
+    plt.bar(products1_time, weights_of_datasource2)
+    plt.show()
+
 if __name__ == "__main__":
 
     main()
