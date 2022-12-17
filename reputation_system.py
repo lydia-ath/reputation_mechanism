@@ -227,11 +227,14 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
             add(subjective_old, i, subjective_updated)
             #final reputation score after the combination of subjective and objective of the datasources
             #where the objective_old and the subjective_old dictionaries are now updated
-            if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
+            if (((subjective_score - objective_scores[i]) > 0.4) or ((objective_scores[i]- subjective_score) > 0.4)):
+            #if (((subjective_score - objective_scores[i]) < 0.15) or ((objective_scores[i]- subjective_score) < 0.15)):
                 print("iiiiiiiiiiiiiiiiiiiiiiiiiiii111111111111", objective_scores[i], "oooooooooooooooooooo", subjective_score)
                 print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
-                if (weights_of_contribution[i]<0.85):
-                    weights_of_contribution[i] +=0.1
+                if (weights_of_contribution[i]>0.15):
+                #if (weights_of_contribution[i]<0.85):
+                    weights_of_contribution[i] -=0.1
+                    #weights_of_contribution[i] +=0.1
                     print ("weighttttttttttttttttttttttt", weights_of_contribution[i])
                     final_reputation = weights_of_contribution[i]*objective_old[i] + (1-weights_of_contribution[i])*subjective_old[i]
                     add(final_reputation_scores, i, final_reputation)
