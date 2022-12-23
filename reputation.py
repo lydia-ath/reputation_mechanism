@@ -89,7 +89,6 @@ def add(self, key, value):
 #the distribution declares the random values that the objective metrics, of the same quality class, will take  
 def choose_distribution(product, target_value, datasource, minmax):
     #all datasources follow uniform good distribution with low deviation(=low noise, values near to mean value)
-    print('ppppppppppppppppppp', minmax, product)
     if (product == 'product1'): #first transaction = first monitoring period
         if (minmax == 'min'):
             actual_value = random.uniform(target_value-0.02, target_value +0.05) #good with low deviation
@@ -101,7 +100,6 @@ def choose_distribution(product, target_value, datasource, minmax):
     #candidate_values = []
     if (product == 'product2' or product == 'product3'): #second transaction = second monitoring period
         if (datasource == 'datasource1' or'datasource3' or'datasource5'):
-            print('ppppppppppppppppppp', minmax, datasource)
             if (minmax == 'min'):
                 actual_value = random.uniform(target_value-0.1, target_value + 0.1) #good with high deviation
                 deviation_actual_value = numpy.std(actual_value)
@@ -123,9 +121,7 @@ def choose_distribution(product, target_value, datasource, minmax):
         #candidate_values.append(actual_value3)
         #actual_value4 = random.uniform(target_value-0.25, 1.0) #bad with high deviation
         #candidate_values.append(actual_value4)
-        #print ("the candidate values from the four kind of distributions are: ", candidate_values)
         #actual_value = candidate_values[random.randrange(len(candidate_values))]
-        #print ("the selected distribution is: ", actual_value)
         #deviation_actual_value = numpy.std(actual_value)
     #all datasources follow uniform bad distribution with high deviation(=high noise, values dispare)
     if (product == 'product4'): #forth transaction = forth monitoring period
@@ -210,12 +206,9 @@ def objective(quality_class1, quality_class2, quality_class1_resources, quality_
     for n in datasources:
         print (n)
         if (contains(objective_scores_qualityclass1, objective_scores_qualityclass2, n)==True):
-            print("mmmmmmmmmm", objective_scores_qualityclass1[n], objective_scores_qualityclass2[n])
             final_objective_score = (objective_scores_qualityclass1[n]+objective_scores_qualityclass2[n])/2
-            print (n, " belogns to multiple quality classes and its final reputation score is: ", final_objective_score)
             add(Objective_scores, n, final_objective_score)
     
-    print("6666666666666666666", Objective_scores)
     return Objective_scores;
 
 #one subjective profile per application type
@@ -254,9 +247,6 @@ def subjective(product, subjective_metrics):
     return subjective_score;
 
 def reputation_update_datasources(objective_scores, subjective_score, product):
-    print("innnnnnnnnnn objectives", objective_scores)
-    print("innnnnnnnnnn subjective", subjective_score)
-    print("innnnnnnnnnn product", product)
     #datasource 2 and datasource 3 contribute in the formation of multiple products that belong to different services/quality classes
     #so they will have multiple values in the same monitoring period based on those quality classes
     
@@ -264,13 +254,11 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
     for i in objective_scores:
         objective_updated = lamda*objective_old[i] + (1-lamda)*objective_scores[i]
         add(objective_old, i, objective_updated)
-    print ("looooooolllllllllllllll", objective_old)
 
     #update subjective score by taking into account the old values
     if(product == 'product1'):
         for i in product1:
             print (i)
-            print ('mplaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', subjective_score, subjective_old)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
             print (subjective_updated)
             add(subjective_old, i, subjective_updated)
@@ -284,7 +272,6 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
     if(product == 'product2'):
         for i in product2:
             print (i)
-            print ('mplaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', subjective_score, subjective_old)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
             print (subjective_updated)
             add(subjective_old, i, subjective_updated)
@@ -296,7 +283,6 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
     if(product == 'product3'):
         for i in product3:
             print (i)
-            print ('mplaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', subjective_score, subjective_old)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
             print (subjective_updated)
             add(subjective_old, i, subjective_updated)
@@ -308,7 +294,6 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
     if(product == 'product4'):
         for i in product4:
             print (i)
-            print ('mplaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', subjective_score, subjective_old)
             subjective_updated = lamda*subjective_old[i] + (1-lamda)*subjective_score
             print (subjective_updated)
             add(subjective_old, i, subjective_updated)
@@ -327,7 +312,6 @@ def reputation_update_datasources(objective_scores, subjective_score, product):
 def reputation_update_providers(final_reputation):
     for i in final_reputation:
         reputation_old_providers = final_reputation
-    print ("providersssssssssss", reputation_old_providers)
     return reputation_old_providers;
 
 #federation 1 --> provider1,2,3,4 --> datasource1,2,3,4
@@ -337,7 +321,6 @@ def reputation_update_federations(final_reputation):
     current_federation2 = 0
     for i in final_reputation:
         if (contains(final_reputation, federation1, i) == True):
-            #print ("OMGGGGGGGGGGG", final_reputation[i])
             current_federation1 = current_federation1 + final_reputation[i]*federation1[i]
         if (contains(final_reputation, federation2, i) == True):
             current_federation2 = current_federation2 + final_reputation[i]*federation2[i]
@@ -346,7 +329,6 @@ def reputation_update_federations(final_reputation):
     reputation_old_federations['federation1'] = final_federation1
     final_federation2 = current_federation2 / sum(federation2.values())
     reputation_old_federations['federation2'] = final_federation2
-    print("OMGGGGGGGGGGGGGGGGG", reputation_old_federations)
     return reputation_old_federations;
 
 #update current product of the traction and the affected ones that may have one or multiple common datasources
@@ -354,7 +336,6 @@ def reputation_update_products(final_reputation):
     current_product1 =0
     for i in final_reputation:
         if(contains(final_reputation, product1, i)== True):
-            #print("FUCKKKKKKKKKKKKKKKKKKKKK", final_reputation[i], product1_weights[i])
             current_product1 = current_product1 + final_reputation[i]*product1[i]
     final_product1 = current_product1/sum(product1.values())
     reputation_old_products['product1']=final_product1
@@ -380,7 +361,6 @@ def reputation_update_products(final_reputation):
     final_product4 = current_product4/sum(product4.values())
     reputation_old_products['product4']=final_product4
 
-    print ("productsssssssssssssssssssssssssssss", reputation_old_products)
     return reputation_old_products;
 
 def main():
